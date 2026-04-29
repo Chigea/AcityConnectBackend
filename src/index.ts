@@ -38,6 +38,41 @@ const port = Number(process.env.PORT ?? 4000);
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN ?? "*", credentials: true }));
 app.use(express.json());
 
+app.get("/", (_req, res) => {
+  res.type("html").send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Fidelia Acity connect</title>
+  <style>
+    :root { color-scheme: light dark; --fg: #1a1a1a; --muted: #666; --accent: #2563eb; --bg: #f8fafc; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fg: #f1f5f9; --muted: #94a3b8; --accent: #60a5fa; --bg: #0f172a; }
+    }
+    * { box-sizing: border-box; }
+    body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--fg); }
+    main { text-align: center; padding: 2rem; max-width: 28rem; }
+    h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+    .badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; color: #166534; background: #dcfce7; padding: 0.25rem 0.65rem; border-radius: 9999px; margin-bottom: 1rem; }
+    @media (prefers-color-scheme: dark) {
+      .badge { color: #86efac; background: #14532d; }
+    }
+    p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 0.9375rem; }
+    a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="badge"><span aria-hidden="true">●</span> Online</div>
+    <h1>Fidelia Acity connect backend</h1>
+    <p>API is up. Use the app’s frontend for the full UI. JSON health check: <a href="/health">/health</a>.</p>
+  </main>
+</body>
+</html>`);
+});
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
