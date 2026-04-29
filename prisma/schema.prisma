@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum ListingCategory {
+  item
+  skill
+}
+
+enum SkillSubtype {
+  offer
+  request
+}
+
+enum ListingStatus {
+  available
+  sold
+  swapped
+}
+
+enum ModerationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum InterestStatus {
+  pending
+  accepted
+  declined
+  completed
+}
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  passwordHash  String
+  role          Role        @default(user)
+  displayName   String?
+  bio           String?
+  skillsOffered String[]    @default([])
+  skillsNeeded  String[]    @default([])
+  flagged       Boolean     @default(false)
+  flaggedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings               Listing[]
+  interests              ListingInterest[]
+  buyerConversations     Conversation[]     @relation("BuyerConversations")
+  sentMessages           Message[]
+  moderatedAudits        ModerationAudit[]
+}
+
+model Listing {
+  id                 String           @id @default(uuid())
+  sellerId           String
+  seller             User             @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  category           ListingCategory
+  skillSubtype       SkillSubtype?
+  status             ListingStatus    @default(available)
+  moderationStatus   ModerationStatus @default(pending)
+  flagged            Boolean          @default(false)
+  flaggedReason      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  interests          ListingInterest[]
+  conversations      Conversation[]
+  moderationAudits   ModerationAudit[]
+}
+
+model ListingInterest {
+  id        String          @id @default(uuid())
+  listingId String
+  listing   Listing         @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    InterestStatus  @default(pending)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, userId])
+}
+
+model Conversation {
+  id        String @id @default(uuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User   @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, buyerId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+
+  createdAt DateTime @default(now())
+}
+
+model ModerationAudit {
+  id          String   @id @default(uuid())
+  moderatorId String
+  moderator   User     @relation(fields: [moderatorId], references: [id])
+  listingId   String?
+  listing     Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  action      String
+  detail      String?
+
+  createdAt DateTime @default(now())
+}

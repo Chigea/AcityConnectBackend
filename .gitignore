@@ -1,0 +1,27 @@
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Environment and secrets — templates such as `.env.example` stay committed
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+*.log
+npm-debug.log*
+
+# Sensitive key material
+*.pem
+*.p12
+
+# Coverage / tooling
+coverage/
+.nyc_output/
+.turbo/
+
+# OS / editors
+.DS_Store
+.idea/
